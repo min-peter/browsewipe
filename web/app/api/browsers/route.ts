@@ -1,3 +1,5 @@
+import { NextResponse } from "next/server";
+
 const BASE_URL = process.env.EXTERNAL_API_DOMAIN;
 
 type Filters = {
@@ -33,7 +35,7 @@ export async function GET(request: Request) {
   });
   const data = await fetch(apiUrl);
   if (!data.ok) {
-    return new Response(data.statusText || 'Failed to fetch post', {
+    return new NextResponse(data.statusText || 'Failed to fetch post', {
       status: data.status
     });
   }
@@ -56,7 +58,7 @@ export async function GET(request: Request) {
   //   total: 100,
   //   data,
   // })
-  return Response.json(posts);
+  return NextResponse.json(posts);
 }
 
 // Data format
@@ -85,7 +87,7 @@ export async function POST(
     const json = await response.json();
     console.log("Created post-",json);
 
-    return Response.json({
+    return NextResponse.json({
       status: 'success',
       message: 'Successfully created.',
       data: json,
@@ -93,7 +95,7 @@ export async function POST(
 
   } catch (error) {
     console.error("POST Error:", error);
-    return Response.json({
+    return NextResponse.json({
       status: 'fail',
       message: 'Fail to create.',
       error: error instanceof Error ? error.message : 'Unknown error',

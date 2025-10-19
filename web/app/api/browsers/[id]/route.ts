@@ -1,3 +1,4 @@
+import { type NextRequest, NextResponse } from "next/server";
 const BASE_URL = process.env.EXTERNAL_API_DOMAIN;
 
 // {
@@ -8,11 +9,11 @@ const BASE_URL = process.env.EXTERNAL_API_DOMAIN;
 // })
 // PUT - Update post by id
 export async function PUT(
-  request: Request,
-  { params }: { params: { id: string } }
+  request: NextRequest,
+  context: { params: { id: string } }
 ) {
   try {
-    const { id } = await params;
+    const { id } = context.params;
     var data = await request.json();
 
     console.log("Incoming PUT data:", data);
@@ -32,14 +33,14 @@ export async function PUT(
     const json = await response.json();
     console.log("Updated post : ", json);
 
-    return Response.json({
+    return NextResponse.json({
       status: 'success',
       message: 'Successfully updated.',
       data: json,
     });
   } catch (error) {
     console.error("PUT error:", error);
-    return Response.json({
+    return NextResponse.json({
       status: 'fail',
       message: 'Fail to update.',
       error: error instanceof Error ? error.message : 'Unknown error',
@@ -48,11 +49,11 @@ export async function PUT(
 }
 
 export async function DELETE(
-  request: Request,
-  { params }: { params: { id: string } }
+  request: NextRequest,
+  context: { params: { id: string } }
 ) {
   try {
-    const { id } = await params;
+    const { id } = context.params;
     const response = await fetch(`${BASE_URL}/posts/${id}`, {
       method: 'DELETE',
     });
@@ -61,12 +62,12 @@ export async function DELETE(
       throw new Error(`External API failed with status: ${response.status}`);
     }
 
-    return Response.json({
+    return NextResponse.json({
       status: 'success',
       message: `Successfully deleted post ID: ${id}.`,
     });
   } catch (error) {
-    return Response.json({
+    return NextResponse.json({
       status: 'fail',
       message: 'Fail to delete.',
       error: error instanceof Error ? error.message : 'Unknown error',
