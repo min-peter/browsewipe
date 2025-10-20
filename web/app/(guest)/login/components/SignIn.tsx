@@ -1,16 +1,12 @@
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { signIn } from "@/lib/auth"
 import { Label } from "@/components/ui/label"
+import { signInWithEmail } from "@/app/actions"
  
 export function SignIn() {
   return (
     <form
-      action={async (formData) => {
-        "use server"
-        console.log("Data:", Object.fromEntries(formData));
-        // await signIn("mailgun", formData)
-      }}
+      action={signInWithEmail}
       id="send_mail_form"
       className="flex flex-col gap-6">
       <div className="grid gap-2">

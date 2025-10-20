@@ -1,12 +1,12 @@
 import NextAuth from "next-auth"
 import Credentials from "next-auth/providers/credentials"
 import { signInSchema } from "./zod"
-import { adapter } from "next/dist/server/web/adapter";
-import { PrismaAdapter } from "@auth/prisma-adapter";
-import { prisma } from "./prisma";
+import { MongoDBAdapter } from "@auth/mongodb-adapter";
+import client, { getUserFromDb } from "./db";
+import { ZodError } from "zod";
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
-  // adapter: PrismaAdapter(prisma),
+  adapter: MongoDBAdapter(client),
   providers: [
     Credentials({
       credentials: {
@@ -14,26 +14,23 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         password: {},
       },
       authorize: async (credentials) => {
-        const { email, password } = await signInSchema.parseAsync(credentials);
+        try {
+          const { email, password } = await signInSchema.parseAsync(credentials);
+          const user = getUserFromDb({email, password});
 
-        // This is a mock user for demonstration purposes.
-        // In a real application, you would fetch the user from your database.
-        const user = {
-          id: "1",
-          name: "John Doe",
-          email: "admin@gmail.com",
-          password: "12345678",
-        };
-
-        if (credentials.email === user.email && credentials.password === user.password) {
-          // Return the user object without the password
-          const { password, ...userWithoutPassword } = user;
-          return userWithoutPassword;
+          if (!user) {
+            throw new Error("Invaid credentials")
+          }
+          return user;
+        } catch (error) {
+          if (error instanceof ZodError) {
+            return null;
+          }
         }
-
-        return null;
       },
     }),
-
   ],
+  session: {
+    strategy: "jwt",
+  }
 })

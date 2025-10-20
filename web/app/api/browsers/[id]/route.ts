@@ -16,10 +16,6 @@ export async function PUT(
     const { id } = context.params;
     var data = await request.json();
 
-    console.log("Incoming PUT data:", data);
-    console.log("BASE_URL:", BASE_URL);
-    console.log("Target URL:", `${BASE_URL}/posts/${id}`);
-
     const response = await fetch(`${BASE_URL}/posts/${id}`, {
       method: 'PUT',
       body: JSON.stringify(data),
@@ -31,7 +27,6 @@ export async function PUT(
     }
 
     const json = await response.json();
-    console.log("Updated post : ", json);
 
     return NextResponse.json({
       status: 'success',

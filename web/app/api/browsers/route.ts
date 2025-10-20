@@ -10,14 +10,12 @@ type Filters = {
 function buildFetchUrl(filters: Filters) : string {
   const { userId } = filters;
   const params = new URLSearchParams();
-  console.log("userId-"+userId);
   if (userId) {
     params.append('userId', userId.toString());
   }
   let url = `${BASE_URL}/posts`;
 
   const queryString = params.toString();
-  console.log("querySting-"+queryString);
   if (queryString) {
     url += `?${queryString}`;
   }
@@ -85,7 +83,6 @@ export async function POST(
     }
 
     const json = await response.json();
-    console.log("Created post-",json);
 
     return NextResponse.json({
       status: 'success',

@@ -1,3 +1,5 @@
+"use client"
+import { loginUser } from "@/app/actions"
 import { Button } from "@/components/ui/button"
 import {
   Card,
@@ -11,15 +13,20 @@ import {
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import Link from "next/link"
-import { signIn } from "@/lib/auth"
-import { SignIn } from "./SignIn"
-import { executeAction } from "@/lib/executeAction"
-import { redirect } from "next/navigation"
-import { AuthError } from "next-auth"
 
-// const SIGNIN_ERROR_URL = "/error"
+import { useState } from "react"
 
 export function LoginCard() {
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  const handleSubmit = async (formData: FormData) => {
+    setErrorMessage(null);
+    const result = await loginUser(formData);
+    if (result && !result.success) {
+      setErrorMessage(result.message);
+    }
+  }
+
   return (
     <Card className="w-full">
       <CardHeader>
@@ -33,21 +40,7 @@ export function LoginCard() {
       </CardHeader>
       <CardContent>
         <form
-          action={async (formData) => {
-            "use server"
-            await executeAction({
-              actionFn: async () => {
-                try {
-                  await signIn("credentials", formData);
-                } catch (error) {
-                  // if (error instanceof AuthError) {
-                  //   return redirect(`?error=${error.message}`)
-                  // }
-                  throw error;
-                }
-              },
-            })
-          }}
+          action={handleSubmit}
           id="login_form"
         >
           <div className="flex flex-col gap-6">
@@ -71,13 +64,16 @@ export function LoginCard() {
         </form>
       </CardContent>
       <CardFooter className="flex-col gap-2">
+        {errorMessage && (
+          <p className="text-sm font-medium text-red-500">{errorMessage}</p>
+        )}
         <Button type="submit" className="w-full" form="login_form">
           Login
         </Button>
-        <hr className="my-4 border border-1 border-gray-100 w-full" />
+        {/* <hr className="my-4 border border-1 border-gray-100 w-full" />
         <div className="w-full">
           <SignIn />
-        </div>
+        </div> */}
       </CardFooter>
     </Card>
   )

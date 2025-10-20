@@ -11,7 +11,6 @@ export const executeAction = async <T>({
 }: Options<T>): Promise<{ success: boolean; message: string}> => {
   try {
     await actionFn();
-
     return {
       success: true,
       message: successMessage,
@@ -24,11 +23,11 @@ export const executeAction = async <T>({
     if (error instanceof ZodError) {
       return {
         success: false,
-        message: error.errors.map((e) => e.message).join(", "),
+        message: error.message,
       };
     }
 
-    if (error instanceof Error && error.message.includes("CredentialsSignin")) {
+    if (error instanceof Error) {
       return {
         success: false,
         message: "Invalid email or password",

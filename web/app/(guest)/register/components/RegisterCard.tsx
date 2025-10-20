@@ -1,3 +1,5 @@
+"use client"
+import { registerUser } from "@/app/actions"
 import { Button } from "@/components/ui/button"
 import {
   Card,
@@ -11,8 +13,17 @@ import {
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import Link from "next/link"
+import { useState } from "react"
 
 export function RegisterCard() {
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  async function handleSubmit(formData: FormData) {
+    setErrorMessage(null);
+    const result = await registerUser(formData);
+    if (!result.success) setErrorMessage(result?.message || "Failed to register");
+  }
+
   return (
     <Card className="w-full">
       <CardHeader>
@@ -25,30 +36,45 @@ export function RegisterCard() {
         </CardAction>
       </CardHeader>
       <CardContent>
-        <form>
+        <form
+          action={handleSubmit}
+          id="register_form"
+        >
           <div className="flex flex-col gap-6">
+            <div className="grid gap-2">
+              <Label htmlFor="name">Name</Label>
+              <Input
+                id="name"
+                type="text"
+                name="name"
+                placeholder="Enter name"
+                required
+              />
+            </div>
             <div className="grid gap-2">
               <Label htmlFor="email">Email</Label>
               <Input
                 id="email"
                 type="email"
+                name="email"
                 placeholder="Enter email"
                 required
               />
             </div>
             <div className="grid gap-2">
               <Label htmlFor="email">Password</Label>
-              <Input id="password" type="password" placeholder="Enter password" required />
+              <Input id="password" type="password" name="password" placeholder="Enter password" required />
             </div>
             <div className="grid gap-2">
               <Label htmlFor="email">Confirm Password</Label>
-              <Input id="password" type="confirm_password" placeholder="Enter password again" required />
+              <Input id="password" type="password" name="confirm_password" placeholder="Enter password again" required />
             </div>
           </div>
         </form>
       </CardContent>
       <CardFooter className="flex-col gap-2">
-        <Button type="submit" className="w-full">
+        {errorMessage && <p className="text-sm text-red-500">{errorMessage}</p>}
+        <Button type="submit" form="register_form" className="w-full">
           Register
         </Button>
         <Button variant="outline" className="w-full">
