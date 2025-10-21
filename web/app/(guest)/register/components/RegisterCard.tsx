@@ -3,7 +3,6 @@ import { registerUser } from "@/app/actions"
 import { Button } from "@/components/ui/button"
 import {
   Card,
-  CardAction,
   CardContent,
   CardDescription,
   CardFooter,
@@ -12,7 +11,6 @@ import {
 } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import Link from "next/link"
 import { useState } from "react"
 
 export function RegisterCard() {
@@ -29,11 +27,8 @@ export function RegisterCard() {
       <CardHeader>
         <CardTitle>Register new account</CardTitle>
         <CardDescription>
-          We will send email confirmation to your email address.
+          After successful registeration, your account will redirect to dashboard.
         </CardDescription>
-        <CardAction>
-          <Link href="/login" ><Button variant="link">Login</Button></Link>
-        </CardAction>
       </CardHeader>
       <CardContent>
         <form
@@ -77,9 +72,9 @@ export function RegisterCard() {
         <Button type="submit" form="register_form" className="w-full">
           Register
         </Button>
-        <Button variant="outline" className="w-full">
+        {/* <Button variant="outline" className="w-full">
           Login with Google
-        </Button>
+        </Button> */}
       </CardFooter>
     </Card>
   )

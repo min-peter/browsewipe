@@ -3,7 +3,6 @@ import { loginUser } from "@/app/actions"
 import { Button } from "@/components/ui/button"
 import {
   Card,
-  CardAction,
   CardContent,
   CardDescription,
   CardFooter,
@@ -12,7 +11,6 @@ import {
 } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import Link from "next/link"
 
 import { useState } from "react"
 
@@ -34,9 +32,6 @@ export function LoginCard() {
         <CardDescription>
           Enter your email below to login to your account
         </CardDescription>
-        <CardAction>
-          <Link href="/register" ><Button variant="link">Register</Button></Link>
-        </CardAction>
       </CardHeader>
       <CardContent>
         <form

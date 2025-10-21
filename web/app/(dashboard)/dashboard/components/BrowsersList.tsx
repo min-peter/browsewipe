@@ -23,7 +23,7 @@ export const BrowsersList = () => {
     <div className="w-full">
       <BrowsersFilter />
       {
-        !isLoading && posts.length === 0 && (
+        !isLoading && (posts?.length == 0 || !posts?.length)&& (
           <div>
             No Item Found.
           </div>
