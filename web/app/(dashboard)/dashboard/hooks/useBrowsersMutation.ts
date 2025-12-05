@@ -2,8 +2,6 @@ import { createBrowsers, deleteBrowsers, updateBrowsers } from "@/lib/api/browse
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 
 export type BrowserData = {
-  title: string;
-  body: string;
   userId: number 
 };
 

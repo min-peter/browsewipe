@@ -1,37 +1,36 @@
+import { connectMongoose } from "@/lib/mongoose";
+import UserBrowser from "@/models/UserBrowser";
 import { type NextRequest, NextResponse } from "next/server";
 const BASE_URL = process.env.EXTERNAL_API_DOMAIN;
 
-// {
-//   id: 1,
-//   title: 'foo',
-//   body: 'bar',
-//   userId: 1,
-// })
-// PUT - Update post by id
+// Update browser emergacy status
 export async function PUT(
-  request: NextRequest,
+  request: any,
   context: { params: { id: string } }
 ) {
-  try {
-    const { id } = context.params;
-    var data = await request.json();
+  await connectMongoose();
 
-    const response = await fetch(`${BASE_URL}/posts/${id}`, {
-      method: 'PUT',
-      body: JSON.stringify(data),
-      headers: { 'Content-Type': 'application/json; charset=UTF-8' },
+  try {
+    const { id } = await context.params;
+    const browserId =  await id;
+    const userId = await request.userId;
+
+    const browser = await UserBrowser.findOne({
+        _id: browserId,
+        user_id: userId,
     });
 
-    if (! response.ok) {
-      throw new Error(`External API failed with status: ${response.status}`);
+    if (!browser) {
+        return NextResponse.json({ message: "Browser profile not found" },{ status: 400 });
     }
 
-    const json = await response.json();
+    browser.emergency_action = !browser.emergency_action;
+    await browser.save();
 
     return NextResponse.json({
       status: 'success',
       message: 'Successfully updated.',
-      data: json,
+      data: browser,
     });
   } catch (error) {
     console.error("PUT error:", error);

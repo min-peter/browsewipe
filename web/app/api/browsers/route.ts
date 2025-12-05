@@ -1,101 +1,40 @@
 import { NextResponse } from "next/server";
+import UserBrowser from '../../../models/UserBrowser';
+import { connectMongoose } from "@/lib/mongoose";
 
-const BASE_URL = process.env.EXTERNAL_API_DOMAIN;
-
-type Filters = {
-  userId?: number;
-  searchTerm?: string;
-}
-
-function buildFetchUrl(filters: Filters) : string {
-  const { userId } = filters;
-  const params = new URLSearchParams();
-  if (userId) {
-    params.append('userId', userId.toString());
-  }
-  let url = `${BASE_URL}/posts`;
-
-  const queryString = params.toString();
-  if (queryString) {
-    url += `?${queryString}`;
-  }
-  return url;
-}
-
-// Get all posts
+// Get all browsers
 export async function GET(request: Request) {
+  await connectMongoose();
+  
   const { searchParams } = new URL(request.url);
-  const userId = Number(searchParams.get('userId'));
+  const userId = searchParams.get('userId');
   const searchTerm = searchParams.get('searchTerm') || '';
-  const apiUrl = buildFetchUrl({
-    userId,
-    searchTerm,
-  });
-  const data = await fetch(apiUrl);
-  if (!data.ok) {
-    return new NextResponse(data.statusText || 'Failed to fetch post', {
-      status: data.status
+
+  console.log("userId:", userId);
+  console.log("searchTerm:", searchTerm);
+  if (!userId) {
+    return NextResponse.json({
+      error: 'No user id found!',
+    }, {
+      status: 400
     });
   }
 
-  let posts = await data.json();
-
-  // Filter (Added because searchTerm not work in dummy test api)
-  if (posts && typeof searchTerm === 'string' && searchTerm.trim() !== '') {
-    const searchLower = searchTerm.toLowerCase();
-    posts = posts.filter(item => {
-      const itemTitle = item.title.toLowerCase();
-      return itemTitle.includes(searchLower);
-    });
-  }
-  // const { items, } = paginate()
-  // return Response.json({
-  //   status: 'success',
-  //   page,
-  //   limit,
-  //   total: 100,
-  //   data,
-  // })
-  return NextResponse.json(posts);
-}
-
-// Data format
-// {
-//   title: 'foo',
-//   body: 'bar',
-//   userId: 1,
-// }
-// Create Post
-export async function POST(
-  request: Request
-) {
   try {
-    const data = await request.json();
-
-    const response = await fetch(`${BASE_URL}/posts`, {
-      method: 'POST',
-      body: JSON.stringify(data),
-      headers: { 'Content-Type': 'application/json; charset=UTF-8' },
-    });
-
-    if (!response.ok) {
-      throw new Error(`External API failed witih status: ${response.status}`);
+    const query: { user_id: string; browser_name?: any} = { user_id: userId };
+    if (searchParams) {
+      query.browser_name = { $regex: searchTerm, $options: 'i' };
     }
-
-    const json = await response.json();
-
-    return NextResponse.json({
-      status: 'success',
-      message: 'Successfully created.',
-      data: json,
-    }, { status: 201 });
-
+    
+    const browsers = await UserBrowser.find(query)
+      .sort({ createdAt: -1 })
+      .lean();
+    
+      return NextResponse.json(browsers);
   } catch (error) {
-    console.error("POST Error:", error);
-    return NextResponse.json({
-      status: 'fail',
-      message: 'Fail to create.',
-      error: error instanceof Error ? error.message : 'Unknown error',
-    }, { status: 500 });
+    console.error("Mongoose query failed:", error);
+    return new NextResponse('Failed to fetch post', {
+      status: 500
+    });
   }
 }

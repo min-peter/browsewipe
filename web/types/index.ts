@@ -1,10 +1,15 @@
+import UserBrowser from "@/models/UserBrowser";
+import { InferSchemaType } from "mongoose";
+
+export type UserId = string;
+
 export type BrowserData = {
-  title: string;
-  body: string;
-  userId: number
+  userId: number;
 }
 
 export type GetBrowsersFilters = {
   userId?: string | '';
   searchTerm?: string | '';
 }
+
+export type IUserBrowser = InferSchemaType<typeof UserBrowser>;

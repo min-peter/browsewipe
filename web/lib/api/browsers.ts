@@ -1,16 +1,14 @@
-import { BrowserData, GetBrowsersFilters } from "@/types/index";
+import { BrowserData, GetBrowsersFilters, UserId } from "@/types/index";
 
-export async function getBrowsers(filters?: GetBrowsersFilters) {
-  let params = '';
-  if (filters) {
-    params += (filters.userId || filters.searchTerm) ? '?' : '';
-    params += filters?.userId ? 'userId='+filters.userId : '';
-    params += (filters.userId && filters.searchTerm) ? '&' : '';
-    params += filters?.searchTerm ? 'searchTerm='+filters.searchTerm : '';
+export async function getBrowsers(userId: UserId, filters?: GetBrowsersFilters) {
+  let url = `/api/browsers?userId=${userId}`;
+  if (filters?.searchTerm) {
+    url += '&searchTerm='+filters.searchTerm; 
   }
-  const response = await fetch(`/api/browsers${params}`);
+  const response = await fetch(url);
+  console.log("response getbroswers-"+JSON.stringify(response));
   if (! response.ok) {
-    throw new Error(`Failed to fetch browsers: ${response.statusText}`);
+    throw new Error(`Failed to fetch browsers`);
   }
   const json = await response.json();
   return json;
@@ -24,7 +22,6 @@ export async function createBrowsers(data: BrowserData) {
     },
     body: JSON.stringify(data),
   });
-
   if (! response.ok) {
     throw new Error(`Failed to create browser: ${response.statusText}`);
   }

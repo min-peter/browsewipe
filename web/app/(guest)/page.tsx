@@ -1,5 +1,5 @@
 export default function Home() {
-  const features = ['Browser Security', 'Wipe the data out', 'Save people'];
+  const features = ['Browser Security', 'Wipe the data out', 'Secure personal data'];
 
   return (
     <div>
