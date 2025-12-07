@@ -24,8 +24,8 @@ export const BrowsersList = () => {
   const { create, update, remove } = useBrowsersMutation();
 
   return (
-    <div className="w-full">
-      <BrowsersFilter />
+    <div className="w-full pt-3">
+      {/* <BrowsersFilter /> */}
       {
         !isLoading && (posts?.length == 0 || !posts?.length)&& (
           <div>

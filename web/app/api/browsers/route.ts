@@ -1,24 +1,29 @@
 import { NextResponse } from "next/server";
 import UserBrowser from '../../../models/UserBrowser';
 import { connectMongoose } from "@/lib/mongoose";
+import { auth } from "@/lib/auth";
 
 // Get all browsers
 export async function GET(request: Request) {
+  const session = await auth();
+  if (!session) {
+    return NextResponse.json({ name: "You must be logged in to access this api." }, { status: 401 });
+  }
+
   await connectMongoose();
   
-  const { searchParams } = new URL(request.url);
-  const userId = searchParams.get('userId');
-  const searchTerm = searchParams.get('searchTerm') || '';
+  const userId = session.user?.id;
 
-  console.log("userId:", userId);
-  console.log("searchTerm:", searchTerm);
   if (!userId) {
     return NextResponse.json({
-      error: 'No user id found!',
+      error: 'User not authenticated or user id not found in session.',
     }, {
-      status: 400
+      status: 401
     });
   }
+
+  const { searchParams } = new URL(request.url);
+  const searchTerm = searchParams.get('searchTerm') || '';
 
   try {
     const query: { user_id: string; browser_name?: any} = { user_id: userId };
