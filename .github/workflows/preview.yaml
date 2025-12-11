@@ -2,6 +2,9 @@ name: Vercel Preview Deployment
 
 # --- 1. Workflow Trigger (When does this run?) ---
 on:
+  push:
+    branches-ignore:
+      - main
   pull_request:
     # Trigger on any PR activity: opening, new commits (synchronize), or reopening
     types: [opened, synchronize, reopened]

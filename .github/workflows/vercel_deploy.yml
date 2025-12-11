@@ -37,25 +37,15 @@ jobs:
       - name: Install Vercel CLI
         run: npm install --global vercel@latest
 
-      # --- Steps 4 & 5: Pass Environment Variables for Build/Deploy ---
-      
-      # ⚠️ Note on 'vercel pull': This step pulls existing Vercel environment variables 
-      # into a .vercel/.env.production.local file. This is generally good, 
-      # but you must ensure it does not conflict with your manually passed variables.
-      - name: Pull Vercel Environment Information
-        run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
-
       - name: Build Project Artifacts (with ENV variables)
-        run: vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
-        # Pass MONGODB_URI and DATABASE_NAME directly to the build step
-        env:
-          NEXTAUTH_URL: ${{ env.NEXTAUTH_URL }}
-          MONGODB_URI: ${{ env.MONGODB_URI }}
-          DATABASE_NAME: ${{ env.DATABASE_NAME }}
-
+        run: |
+          MONGODB_URI="${{ env.MONGODB_URI }}" \
+          DATABASE_NAME="${{ env.DATABASE_NAME }}" \
+          NEXTAUTH_URL="${{ env.NEXTAUTH_URL }}" \
+          vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
+        
       - name: Deploy Project Artifacts to Vercel
         run: vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
-
         env:
           NEXTAUTH_URL: ${{ env.NEXTAUTH_URL }}
           MONGODB_URI: ${{ env.MONGODB_URI }}
