@@ -2,7 +2,6 @@ import { connectMongoose } from "@/lib/mongoose";
 import UserBrowser from "@/models/UserBrowser";
 import { type NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
-const BASE_URL = process.env.EXTERNAL_API_DOMAIN;
 
 // Update browser emergacy status
 export async function PUT(
