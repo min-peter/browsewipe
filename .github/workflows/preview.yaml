@@ -1,21 +1,54 @@
 name: Vercel Preview Deployment
+
+# --- 1. Workflow Trigger (When does this run?) ---
+on:
+  pull_request:
+    # Trigger on any PR activity: opening, new commits (synchronize), or reopening
+    types: [opened, synchronize, reopened]
+    # Restrict to changes in the 'web' directory, matching your production workflow
+    paths:
+      - 'web/**'
+
+# --- 2. Environment Variables (for the whole job) ---
 env:
   VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
   VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
-on:
-  push:
-    branches-ignore:
-      - main
+  NEXTAUTH_URL: ${{ envs.NEXTAUTH_URL }} 
+  MONGODB_URI: ${{ secrets.MONGODB_URI }}
+  DATABASE_NAME: ${{ secrets.DATABASE_NAME }}
+
 jobs:
   Deploy-Preview:
     runs-on: ubuntu-latest
+    
+    defaults:
+      run:
+        working-directory: web
+        
     steps:
-      - uses: actions/checkout@v2
-      - name: Install Vercel CLI
-        run: npm install --global vercel@latest
-      - name: Pull Vercel Environment Information
-        run: vercel pull --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
-      - name: Build Project Artifacts
-        run: vercel build --token=${{ secrets.VERCEL_TOKEN }}
-      - name: Deploy Project Artifacts to Vercel
-        run: vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }}
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4 
+        with:
+          node-version: 20
+
+      - name: Install Dependencies
+        run: npm ci
+
+      # --- 3. Vercel Deployment Action ---
+      - name: Deploy Preview to Vercel
+        uses: amondnet/vercel-action@v25 
+        with:
+          vercel-token: ${{ secrets.VERCEL_TOKEN }} 
+          vercel-org-id: ${{ env.VERCEL_ORG_ID }}
+          vercel-project-id: ${{ env.VERCEL_PROJECT_ID }}
+          prod: false
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          vercel-args: |
+            --build-env MONGODB_URI="${{ env.MONGODB_URI }}" 
+            --build-env DATABASE_NAME="${{ env.DATABASE_NAME }}"
+            
+      - name: Post-Deployment Check
+        run: echo "Vercel Preview Deployment for PR

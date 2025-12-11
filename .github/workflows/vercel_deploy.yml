@@ -1,32 +1,62 @@
 name: Vercel Production Deployment
+
 env:
   VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
   VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+  NEXTAUTH_URL: ${{ secrets.NEXTAUTH_PRODUCTION_URL }} 
+  MONGODB_URI: ${{ secrets.MONGODB_URI }}
+  DATABASE_NAME: ${{ secrets.DATABASE_NAME }}
+
 on:
   push:
     branches:
-      - feat/deploy-setup
+      - main
     paths:
       - 'web/**'
 
 jobs:
   Deploy-Production:
     runs-on: ubuntu-latest
+    
     defaults:
       run:
         working-directory: web
+        
     steps:
-      - uses: actions/checkout@v2
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4 
+        with:
+          node-version: 20
+
+      - name: Install Dependencies
+        run: npm ci
 
       - name: Install Vercel CLI
         run: npm install --global vercel@latest
 
+      # --- Steps 4 & 5: Pass Environment Variables for Build/Deploy ---
+      
+      # ⚠️ Note on 'vercel pull': This step pulls existing Vercel environment variables 
+      # into a .vercel/.env.production.local file. This is generally good, 
+      # but you must ensure it does not conflict with your manually passed variables.
       - name: Pull Vercel Environment Information
         run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
 
-      - name: Build Project Artifacts
+      - name: Build Project Artifacts (with ENV variables)
         run: vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
-        continue-on-error: true
+        # Pass MONGODB_URI and DATABASE_NAME directly to the build step
+        env:
+          NEXTAUTH_URL: ${{ env.NEXTAUTH_URL }}
+          MONGODB_URI: ${{ env.MONGODB_URI }}
+          DATABASE_NAME: ${{ env.DATABASE_NAME }}
 
       - name: Deploy Project Artifacts to Vercel
         run: vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
+
+        env:
+          NEXTAUTH_URL: ${{ env.NEXTAUTH_URL }}
+          MONGODB_URI: ${{ env.MONGODB_URI }}
+          DATABASE_NAME: ${{ env.DATABASE_NAME }}
