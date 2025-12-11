@@ -13,9 +13,8 @@ on:
 env:
   VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
   VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
-  NEXTAUTH_URL: ${{ envs.NEXTAUTH_URL }} 
-  MONGODB_URI: ${{ secrets.MONGODB_URI }}
-  DATABASE_NAME: ${{ secrets.DATABASE_NAME }}
+  MONGODB_URI: ${{ secrets.STAGING_MONGODB_URI }}
+  DATABASE_NAME: ${{ secrets.STAGING_DATABASE_NAME }}
 
 jobs:
   Deploy-Preview:
