@@ -44,7 +44,6 @@ jobs:
           vercel-token: ${{ secrets.VERCEL_TOKEN }} 
           vercel-org-id: ${{ env.VERCEL_ORG_ID }}
           vercel-project-id: ${{ env.VERCEL_PROJECT_ID }}
-          prod: false
           github-token: ${{ secrets.GITHUB_TOKEN }}
           vercel-args: |
             --build-env MONGODB_URI="${{ env.MONGODB_URI }}" 
