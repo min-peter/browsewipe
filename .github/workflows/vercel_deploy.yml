@@ -10,7 +10,7 @@ env:
 on:
   push:
     branches:
-      - feat/deploy-setup
+      - main
     paths:
       - 'web/**'
 
