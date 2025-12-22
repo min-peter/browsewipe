@@ -1,9 +1,6 @@
 name: Vercel Preview Deployment
 
 on:
-  push:
-    branches-ignore:
-      - main
   pull_request:
     types: [opened, synchronize, reopened]
     paths:
@@ -12,9 +9,6 @@ on:
 env:
   VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
   VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
-  MONGODB_URI: ${{ secrets.STAGING_MONGODB_URI }}
-  DATABASE_NAME: ${{ secrets.STAGING_DATABASE_NAME }}
-  AUTH_SECRET: ${{ secrets.AUTH_SECRET }}
 
 jobs:
   Deploy-Preview:
@@ -36,21 +30,19 @@ jobs:
       - name: Install Dependencies
         run: npm ci
 
-      - name: Deploy Preview to Vercel
-        uses: amondnet/vercel-action@v25 
-        with:
-          vercel-token: ${{ secrets.VERCEL_TOKEN }} 
-          vercel-org-id: ${{ env.VERCEL_ORG_ID }}
-          vercel-project-id: ${{ env.VERCEL_PROJECT_ID }}
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          vercel-args: |
-            --build-env MONGODB_URI="${{ env.MONGODB_URI }}" 
-            --build-env DATABASE_NAME="${{ env.DATABASE_NAME }}"
-            --build-env AUTH_SECRET="${{ env.AUTH_SECRET }}"
-            --build-env AUTH_TRUST_HOST="true"
-            --env AUTH_TRUST_HOST="true"
-            --build-env NEXTAUTH_URL="https://${{ github.event.pull_request.number }}--${{ secrets.VERCEL_PROJECT_NAME }}.vercel.app"
-          working-directory: ./web
+      - name: Install Vercel CLI
+        run: npm install --global vercel@latest
 
-      - name: Post-Deployment Check
-        run: echo "Vercel Preview Deployment successful"
+      - name: Pull Vercel Environment Information
+        run: vercel pull --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: Build Project Artifacts
+        run: vercel build --token=${{ secrets.VERCEL_TOKEN }}
+        env:
+          MONGODB_URI: ${{ secrets.STAGING_MONGODB_URI }}
+          DATABASE_NAME: ${{ secrets.STAGING_DATABASE_NAME }}
+          AUTH_SECRET: ${{ secrets.AUTH_SECRET }}
+          AUTH_TRUST_HOST: "true"
+
+      - name: Deploy Project Artifacts to Vercel
+        run: vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }}
