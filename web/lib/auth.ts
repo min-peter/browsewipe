@@ -7,6 +7,7 @@ import { ZodError } from "zod";
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   adapter: MongoDBAdapter(client),
+  trustHost: true,
   providers: [
     Credentials({
       credentials: {
@@ -15,11 +16,11 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       },
       authorize: async (credentials) => {
         try {
-          const { email, password } = await signInSchema.parseAsync(credentials);
-          const user = getUserFromDb({email, password});
+          const validated = await signInSchema.parseAsync(credentials);
+          const user = await getUserFromDb({email: validated.email, password: validated.password});
 
           if (!user) {
-            throw new Error("Invaid credentials")
+            return null;
           }
           return user;
         } catch (error) {
