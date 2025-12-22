@@ -5,9 +5,7 @@ on:
     branches-ignore:
       - main
   pull_request:
-    # Trigger on any PR activity: opening, new commits (synchronize), or reopening
     types: [opened, synchronize, reopened]
-    # Restrict to changes in the 'web' directory, matching your production workflow
     paths:
       - 'web/**'
 
@@ -16,6 +14,8 @@ env:
   VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
   MONGODB_URI: ${{ secrets.STAGING_MONGODB_URI }}
   DATABASE_NAME: ${{ secrets.STAGING_DATABASE_NAME }}
+  AUTH_SECRET: ${{ secrets.AUTH_SECRET }}
+  AUTH_TRUST_HOST: "true"
 
 jobs:
   Deploy-Preview:
@@ -37,7 +37,6 @@ jobs:
       - name: Install Dependencies
         run: npm ci
 
-      # --- 3. Vercel Deployment Action ---
       - name: Deploy Preview to Vercel
         uses: amondnet/vercel-action@v25 
         with:
@@ -48,6 +47,9 @@ jobs:
           vercel-args: |
             --build-env MONGODB_URI="${{ env.MONGODB_URI }}" 
             --build-env DATABASE_NAME="${{ env.DATABASE_NAME }}"
+            --build-env AUTH_SECRET="${{ env.AUTH_SECRET }}"
+            --build-env AUTH_TRUST_HOST="true"
+            --env AUTH_TRUST_HOST="true"
             
       - name: Post-Deployment Check
-        run: echo "Vercel Preview Deployment for PR
+        run: echo "Vercel Preview Deployment successful"
