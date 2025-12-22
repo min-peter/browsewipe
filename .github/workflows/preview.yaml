@@ -15,7 +15,6 @@ env:
   MONGODB_URI: ${{ secrets.STAGING_MONGODB_URI }}
   DATABASE_NAME: ${{ secrets.STAGING_DATABASE_NAME }}
   AUTH_SECRET: ${{ secrets.AUTH_SECRET }}
-  AUTH_TRUST_HOST: "true"
 
 jobs:
   Deploy-Preview:
@@ -50,6 +49,8 @@ jobs:
             --build-env AUTH_SECRET="${{ env.AUTH_SECRET }}"
             --build-env AUTH_TRUST_HOST="true"
             --env AUTH_TRUST_HOST="true"
-            
+            --build-env NEXTAUTH_URL="https://${{ github.event.pull_request.number }}--${{ secrets.VERCEL_PROJECT_NAME }}.vercel.app"
+          working-directory: ./web
+
       - name: Post-Deployment Check
         run: echo "Vercel Preview Deployment successful"
