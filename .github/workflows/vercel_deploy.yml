@@ -6,6 +6,7 @@ on:
       - feat/deploy-setup
     paths:
       - "web/**"
+      - ".github/workflows/**"
 
 env:
   VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
