@@ -3,7 +3,7 @@ name: Web Client Deployment
 on:
   push:
     branches:
-      - main
+      - feat/deploy-setup
     paths:
       - "web/**"
 
