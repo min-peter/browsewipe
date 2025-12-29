@@ -1,19 +1,20 @@
 import { connectMongoose } from "@/lib/mongoose";
 import UserBrowser from "@/models/UserBrowser";
+import { getServerSession } from "next-auth";
 import { type NextRequest, NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
-const BASE_URL = process.env.EXTERNAL_API_DOMAIN;
+import { authOptions } from "../../auth/[...nextauth]/route";
 
 // Update browser emergacy status
 export async function PUT(
   request: NextRequest,
   context: { params: Promise<{ id: string }> }
 ) {
-  const session = await auth();
-  if (!session?.user?.id) {
+  const { user } = await getServerSession(authOptions);
+  const userId = user?.id;
+
+  if (!userId) {
     return NextResponse.json({ message: "Not authenticated" }, { status: 401 });
   }
-  const userId = session.user.id;
   const { id: browserId } = await context.params;
 
   await connectMongoose();
@@ -50,7 +51,7 @@ export async function DELETE(
   request: NextRequest,
   context: { params: Promise<{ id: string }> }
 ) {
-  const session = await auth();
+  const session = await getServerSession(authOptions);
   if (!session?.user?.id) {
     return NextResponse.json({ message: "Not authenticated" }, { status: 401 });
   }

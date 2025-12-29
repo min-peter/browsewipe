@@ -1,22 +1,14 @@
-import { NextRequest, NextResponse } from "next/server";
+import { withAuth } from "next-auth/middleware"
 
-export function middleware(request: NextRequest) {
-    const token = request.cookies.get('auth_token');
+export default withAuth({
+  pages: {
+    signIn: "/login",
+  },
+})
 
-    if (!token) {
-        return NextResponse.json({
-            success: false,
-            message: 'authentication failed',
-        },
-        {
-            status: 401,
-        });
-    }
-
-    return NextResponse.next();
-}
-
-export const config = {
-    matcher: '/api/browsers/protected/:path*',
-    // matcher: '/api/browsers/:path*',
+export const config = { 
+  matcher: [
+    "/dashboard/:path*", 
+    "/api/browsers/:path*",
+  ] 
 }

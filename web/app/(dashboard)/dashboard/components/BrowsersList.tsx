@@ -12,12 +12,9 @@ import {
 import { useBrowsersQuery } from "../hooks/useBrowsersQuery";
 import { useBrowsersMutation } from "../hooks/useBrowsersMutation";
 import { useBrowsersFilter } from "@/app/store/filterStore";
-import { BrowsersFilter } from "./BrowsersFilter";
-import { useSession } from "next-auth/react";
 
-export const BrowsersList = () => {
-  const { data: session, status } = useSession();
-  const userId = session?.user?.id;
+export const BrowsersList = ({ userId }: { userId: string }) => {
+  console.log("BrowsersList userId:", userId);
 
   const { browsersFilters } = useBrowsersFilter();
   const { data: posts, isLoading, isError } = useBrowsersQuery({ userId, browsersFilters });
@@ -34,7 +31,7 @@ export const BrowsersList = () => {
         )
       }
       {isLoading ? <div>Loading...</div> : posts?.map((p) => (
-        <div key={p.id} className="mb-2">
+        <div key={p._id} className="mb-2">
           <Card>
             <CardHeader>
               <CardTitle>{ p.profile_label }</CardTitle>

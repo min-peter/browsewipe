@@ -55,9 +55,9 @@ export const getUserFromDb = async ({ email, password}: {email: string, password
   const validPassword = await bcrypt.compare(password, user.password);
   if (!validPassword) throw new Error("Invalid credentials");
 
-  const { password: _pw, ...safeUser } = user;
+  const { password: _pw, _id, ...safeUser } = user;
   return {
-    id: user._id.toString(),
+    id: _id.toString(),
     name: user.name ?? null,
     email: user.email,
     image: user.image ?? null,
@@ -65,7 +65,7 @@ export const getUserFromDb = async ({ email, password}: {email: string, password
   };
 }
 
-export const createUser = async (formData: FormData) => {
+export const createUser = async (data) => {
   if (!DATABSE_NAME) {
     throw new Error("No DATABSE_NAME set in server enviornment");
   }
@@ -75,10 +75,10 @@ export const createUser = async (formData: FormData) => {
 
   try {
     const { name, email, password } = signUpSchema.parse({
-      name: formData.get("name"),
-      email: formData.get("email"),
-      password: formData.get("password"),
-      confirm_password: formData.get("confirm_password"),
+      name: data.name,
+      email: data.email,
+      password: data.password,
+      confirm_password: data.confirm_password,
     });
 
     const user_already_exit = await usersCollection.findOne({ email });
@@ -108,6 +108,22 @@ export const createUser = async (formData: FormData) => {
       return { success: false, message: error.message };
     }
 
+    if (error instanceof Error) {
+      return { success: false, message: error.message };
+    }
+    return { success: false, message: "Unknown error occurred" };
+  }
+}
+
+export const loginUser = async (data) => {
+  const { email, password } = data;
+  try {
+    const user = await getUserFromDb({ email, password });
+    return {
+      success: true,
+      user: user,
+    };
+  } catch (error) {
     if (error instanceof Error) {
       return { success: false, message: error.message };
     }

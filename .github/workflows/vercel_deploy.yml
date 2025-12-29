@@ -1,0 +1,46 @@
+name: Web Client Deployment
+
+on:
+  push:
+    branches:
+      - feat/deploy-setup
+    paths:
+      - "web/**"
+      - ".github/workflows/**"
+
+env:
+  VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+  VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+  MONGODB_URI: ${{ secrets.MONGODB_URI }}
+  DATABASE_NAME: ${{ secrets.DATABASE_NAME }}
+  NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET }}
+  NEXTAUTH_URL: ${{ secrets.NEXTAUTH_URL }}
+  
+jobs:
+  deploy-production:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+        working-directory: web
+
+      - name: Install Vercel CLI
+        run: npm install -g vercel@latest
+
+      - name: Build and Deploy
+        run: |
+          vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+          vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
+          vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
+
