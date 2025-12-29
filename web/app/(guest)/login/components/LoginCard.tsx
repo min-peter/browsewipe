@@ -1,5 +1,4 @@
 "use client"
-import { loginUser } from "@/app/actions"
 import { Button } from "@/components/ui/button"
 import {
   Card,
@@ -11,17 +10,29 @@ import {
 } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { signIn } from "next-auth/react"
+import { useRouter } from 'next/navigation';
 
-import { useState } from "react"
+import { FormEvent, useState } from "react"
 
 export function LoginCard() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const router = useRouter();
 
-  const handleSubmit = async (formData: FormData) => {
-    setErrorMessage(null);
-    const result = await loginUser(formData);
-    if (result && !result.success) {
-      setErrorMessage(result.message);
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    const response = await signIn('credentials', {
+      email: formData.get('email'),
+      password: formData.get('password'),
+      redirect: false,
+    });
+
+    if (!response?.error) {
+      router.push('/');
+      router.refresh();
+    } else {
+      setErrorMessage(`Login failed: ${response.error}`);
     }
   }
 
@@ -35,7 +46,7 @@ export function LoginCard() {
       </CardHeader>
       <CardContent>
         <form
-          action={handleSubmit}
+          onSubmit={handleSubmit}
           id="login_form"
         >
           <div className="flex flex-col gap-6">

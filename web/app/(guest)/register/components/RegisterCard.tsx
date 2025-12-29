@@ -1,5 +1,4 @@
 "use client"
-import { registerUser } from "@/app/actions"
 import { Button } from "@/components/ui/button"
 import {
   Card,
@@ -11,15 +10,36 @@ import {
 } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { useState } from "react"
+import { FormEvent, useState } from "react"
+import { useRouter } from 'next/navigation';
 
 export function RegisterCard() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const router = useRouter();
 
-  async function handleSubmit(formData: FormData) {
-    setErrorMessage(null);
-    const result = await registerUser(formData);
-    if (!result.success) setErrorMessage(result?.message || "Failed to register");
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    const response = await fetch('/api/auth/register', {
+      method: 'POST',
+      body: JSON.stringify({
+        name: formData.get('name'),
+        email: formData.get('email'),
+        password: formData.get('password'),
+        confirm_password: formData.get('confirm_password'),
+      }),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (response.ok) {
+      router.push('/dashboard');
+      router.refresh();
+    } else {
+      const errorText = await response.text();
+      setErrorMessage(`Registration failed: ${errorText}`);
+    }
   }
 
   return (
@@ -32,7 +52,7 @@ export function RegisterCard() {
       </CardHeader>
       <CardContent>
         <form
-          action={handleSubmit}
+          onSubmit={handleSubmit}
           id="register_form"
         >
           <div className="flex flex-col gap-6">

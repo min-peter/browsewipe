@@ -24,3 +24,4 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 - zustand (Client state management)
 - React Query (Server state management)
 - Auth.js
+- next-auth@4.24.11
