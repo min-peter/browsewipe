@@ -22,7 +22,7 @@ jobs:
     # This handles the path for ALL steps below
     defaults:
       run:
-        working-directory: ./web
+        working-directory: .
 
     steps:
       - name: Checkout repository
@@ -43,11 +43,6 @@ jobs:
 
       - name: Build and Deploy
         run: |
-          # 1. Pull Vercel config
-          vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
-          
-          # 2. Build (Uses GitHub env vars for MongoDB)
-          vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
-          
-          # 3. Deploy
-          vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
+          vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }} --cwd=web
+          vercel build --prod --token=${{ secrets.VERCEL_TOKEN }} --cwd=web
+          vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }} --cwd=web
