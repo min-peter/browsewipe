@@ -59,10 +59,10 @@ export const authOptions: NextAuthOptions = {
     },
     async session({ session, token }) {
       if (session.user) {
-        session.user.id = token.sub
+        session.user.id = (token.id ?? token.sub) as string;
       }
       return session;
-    },
+    }
   },
 
   useSecureCookies: process.env.NODE_ENV === "production",
