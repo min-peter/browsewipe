@@ -39,6 +39,7 @@ jobs:
 
       - name: Build and Deploy
         run: |
-          vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }} --cwd=web
-          vercel build --prod --token=${{ secrets.VERCEL_TOKEN }} --cwd=web
-          vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }} --cwd=web
+          vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+          vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
+          vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
+
