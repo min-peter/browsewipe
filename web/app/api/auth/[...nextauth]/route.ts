@@ -9,7 +9,6 @@ declare module "next-auth" {
       id: string
     } & DefaultSession["user"]
   }
-
   interface User {
     id: string
   }
@@ -20,12 +19,6 @@ declare module "next-auth/jwt" {
     id: string
   }
 }
-
-const getBaseUrl = () => {
-  if (process.env.NEXTAUTH_URL) return process.env.NEXTAUTH_URL;
-  if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`;
-  return 'http://localhost:3000';
-};
 
 export const authOptions: NextAuthOptions = {
   session: {
@@ -41,16 +34,16 @@ export const authOptions: NextAuthOptions = {
         email: {},
         password: {},
       },
-      async authorize(credentials, req) {
+      async authorize(credentials) {
         try {
-          const validated = await signInSchema.parseAsync(credentials)
-
+          const validated = await signInSchema.parseAsync(credentials);
           const user = await getUserFromDb({
             email: validated.email,
             password: validated.password,
-          })
+          });
 
-          return user;
+          // Ensure the user object returned from DB has an 'id'
+          return user ?? null;
         } catch (error) {
           return null;
         }
@@ -58,14 +51,28 @@ export const authOptions: NextAuthOptions = {
     })
   ],
   callbacks: {
-      async session({ session, token }) {
-        session.user.id = token.sub;
-        return session;
-      },
+    async jwt({ token, user }) {
+      if (user) {
+        token.id = user.id;
+      }
+      return token;
     },
+    async session({ session, token }) {
+      if (session.user) {
+        session.user.id = token.sub
+      }
+      return session;
+    },
+    async redirect({ url, baseUrl }) {
+      if (url.startsWith("/")) return `${baseUrl}${url}`;
+      else if (new URL(url).origin === baseUrl) return url;
+      return baseUrl;
+    },
+  },
+
+  useSecureCookies: process.env.NODE_ENV === "production",
   secret: process.env.NEXTAUTH_SECRET,
 };
 
 const handler = NextAuth(authOptions);
-
 export { handler as GET, handler as POST };
